@@ -1,0 +1,12 @@
+[package]
+name = "StatBeacon"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8.19"
+reqwest = { version = "0.12.9", features = ["json"] }
+sysinfo = { version = "0.32.1", features = ["serde"] }
+tokio = { version = "1", features = ["full"] }
+chrono = "0.4.38"
