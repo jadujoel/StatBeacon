@@ -17,34 +17,33 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Step 2: Install Rust
-    - name: Set up Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
+      # Step 2: Install Rust
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
 
-    # Step 3: Build the application
-    - name: Build the app
-      run: cargo build --release
+      # Step 3: Build the application
+      - name: Build the app
+        run: cargo build --release
 
-    # Step 4: Package the binary
-    - name: Package the app
-      run: |
-        mkdir -p dist
-        cp target/release/{BINARY_NAME} dist/
-        cd dist
-        tar -czvf {BINARY_NAME}-linux.tar.gz {BINARY_NAME}
+      # Step 4: Package the binary
+      - name: Package the app
+        run: |
+          mkdir -p dist
+          cp target/release/${{ env.BINARY_NAME }} dist/
+          cd dist
+          tar -czvf ${{ env.BINARY_NAME }}-linux.tar.gz ${{ env.BINARY_NAME }}
 
-
-    # Step 5: Upload the package to the release
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: dist/{BINARY_NAME}-linux.tar.gz
-        asset_name: {BINARY_NAME}-linux.tar.gz
-        content_type: application/gzip
+      # Step 5: Upload the package to the release
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: dist/${{ env.BINARY_NAME }}-linux.tar.gz
+          asset_name: ${{ env.BINARY_NAME }}-linux.tar.gz
+          content_type: application/gzip
