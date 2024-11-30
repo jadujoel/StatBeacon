@@ -8,7 +8,7 @@ env:
   BINARY_NAME: StatBeacon # Replace with your binary name from Cargo.toml
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -47,3 +47,5 @@ jobs:
           asset_path: dist/${{ env.BINARY_NAME }}-linux.tar.gz
           asset_name: ${{ env.BINARY_NAME }}-linux.tar.gz
           asset_content_type: application/gzip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
