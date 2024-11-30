@@ -46,4 +46,4 @@ jobs:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: dist/${{ env.BINARY_NAME }}-linux.tar.gz
           asset_name: ${{ env.BINARY_NAME }}-linux.tar.gz
-          content_type: application/gzip
+          asset_content_type: application/gzip
