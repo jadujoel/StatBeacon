@@ -1,0 +1,43 @@
+name: sRelease
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Install Rust
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+
+    # Step 3: Build the application
+    - name: Build the app
+      run: cargo build --release
+
+    # Step 4: Package the binary
+    - name: Package the app
+      run: |
+        mkdir -p dist
+        cp target/release/{your_binary_name} dist/
+        cd dist
+        tar -czvf {your_binary_name}-linux.tar.gz {your_binary_name}
+      env:
+        your_binary_name: my_rust_app # Replace with your binary name from Cargo.toml
+
+    # Step 5: Upload the package to the release
+    - name: Upload release asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: dist/{your_binary_name}-linux.tar.gz
+        asset_name: {your_binary_name}-linux.tar.gz
+        content_type: application/gzip
