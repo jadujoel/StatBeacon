@@ -1,2 +1,4 @@
 /target
 StatBeacon.toml
+.env
+example.json

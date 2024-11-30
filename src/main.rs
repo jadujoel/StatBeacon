@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
 use std::env;
+use std::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct CliArgs {
@@ -31,7 +31,6 @@ fn read_cli_args() -> CliArgs {
         };
     };
     CliArgs::default()
-
 }
 
 /// Configuration struct
@@ -39,6 +38,7 @@ fn read_cli_args() -> CliArgs {
 struct Config {
     name: String,
     interval_seconds: u64,
+    proxy: Option<String>,
     target_stat_url: String,
     target_alert_url: String,
     cpu_alert_threshold: f32,
@@ -77,7 +77,14 @@ async fn main() {
     println!("CLI Args: {cli_args:?}");
     println!("Configuration: {config:?}");
 
-    let client = reqwest::Client::new();
+    let builder = reqwest::Client::builder();
+    let client = if let Some(proxy_address) = config.proxy {
+        println!("Using proxy: {proxy_address}");
+        let proxy = reqwest::Proxy::all(proxy_address).unwrap();
+        builder.proxy(proxy).build().expect("Failed to build reqwest client with proxy")
+    } else {
+        builder.build().expect("Failed to build reqwest client")
+    };
 
     let mut sys = sysinfo::System::new_all();
     let mut components = sysinfo::Components::new_with_refreshed_list();

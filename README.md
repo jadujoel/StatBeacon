@@ -17,4 +17,8 @@ target_alert_url = "http://example/api/alerts"
 cpu_alert_threshold = 60
 memory_alert_threshold = 80
 temperature_alert_threshold = 70
+
+# Uncomment the following line to use a proxy server
+# proxy = "http://localhost:8080"
+
 ```
