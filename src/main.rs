@@ -70,6 +70,119 @@ struct TemperatureData {
     temperature: f32, // Celsius
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct AlertMessage {
+    pub text: String,
+    pub attachments: Vec<Attachment>,
+}
+
+impl From<StatsLog> for AlertMessage {
+    fn from(value: StatsLog) -> Self {
+        if value.level == "warn" {
+            AlertMessage {
+                text: format!("Alert: {} is experiencing high resource usage!", value.name),
+                attachments: vec![Attachment {
+                    color: "#ff0000".to_string(),
+                    title: "System Alert".to_string(),
+                    text: "The system is running low on resources.".to_string(),
+                    fields: vec![
+                        Field {
+                            title: "Name".to_string(),
+                            value: value.name,
+                            short: true,
+                        },
+                        Field {
+                            title: "Status".to_string(),
+                            value: value.level,
+                            short: true,
+                        },
+                        Field {
+                            title: "CPU".to_string(),
+                            value: value.cpu,
+                            short: true,
+                        },
+                        Field {
+                            title: "Memory".to_string(),
+                            value: value.mem,
+                            short: true,
+                        },
+                        Field {
+                            title: "Temperature".to_string(),
+                            value: value.temp,
+                            short: true,
+                        },
+                        Field {
+                            title: "Time".to_string(),
+                            value: value.time,
+                            short: true,
+                        },
+                    ],
+                    footer: "StatBeacon".to_string(),
+                }],
+            }
+        } else {
+            AlertMessage {
+                text: format!("Update: {} resource usage", value.name),
+                attachments: vec![Attachment {
+                    color: "#228B22".to_string(),
+                    title: "System Update".to_string(),
+                    text: "The system is currently ok.".to_string(),
+                    fields: vec![
+                        Field {
+                            title: "Name".to_string(),
+                            value: value.name,
+                            short: true,
+                        },
+                        Field {
+                            title: "Status".to_string(),
+                            value: value.level,
+                            short: true,
+                        },
+                        Field {
+                            title: "CPU".to_string(),
+                            value: value.cpu,
+                            short: true,
+                        },
+                        Field {
+                            title: "Memory".to_string(),
+                            value: value.mem,
+                            short: true,
+                        },
+                        Field {
+                            title: "Temperature".to_string(),
+                            value: value.temp,
+                            short: true,
+                        },
+                        Field {
+                            title: "Time".to_string(),
+                            value: value.time,
+                            short: true,
+                        },
+                    ],
+                    footer: "StatBeacon".to_string(),
+                }],
+            }
+        }
+
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Attachment {
+    pub color: String,
+    pub title: String,
+    pub text: String,
+    pub fields: Vec<Field>,
+    pub footer: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Field {
+    pub title: String,
+    pub value: String,
+    pub short: bool,
+}
+
 #[tokio::main]
 async fn main() {
     let cli_args: CliArgs = read_cli_args();
@@ -131,17 +244,19 @@ async fn main() {
             time: formatted_time.clone(),
         };
 
+        let msg = AlertMessage::from(stats);
+
         // Post stats to the server
         if let Ok(response) = client
             .post(&config.target_stat_url)
-            .json(&stats)
+            .json(&msg)
             .send()
             .await
         {
             if response.status().is_success() {
                 // Data posted successfully
             } else {
-                eprintln!("Error posting data");
+                eprintln!("Error posting data Status: {}", response.status());
             }
         }
 
@@ -161,9 +276,12 @@ async fn main() {
                 temp: temperature_formatted.clone(),
                 time: formatted_time.clone(),
             };
+
+            let msg = AlertMessage::from(alert);
+
             if let Ok(response) = client
                 .post(&config.target_alert_url)
-                .json(&alert)
+                .json(&msg)
                 .send()
                 .await
             {
